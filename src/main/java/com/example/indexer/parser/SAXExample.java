@@ -13,14 +13,15 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class SAXExample {
-    private static final String path = "rss.xml";
-    
+    private static final String RSS_URL_STR = "https://news.ycombinator.com/rss";
+
     private Channel currentChannel;
     private Element currentElement;
     private Item currentItem;
@@ -31,11 +32,10 @@ public class SAXExample {
         SAXParserFactory factory = SAXParserFactory.newInstance();
         SAXParser parser = factory.newSAXParser();
 
-        File rss = new File(SAXExample.class.getClassLoader().getResource(path).getFile());
-
+        URL rssUrl = new URL(RSS_URL_STR);
 
         XMLHandler handler = new XMLHandler();
-        parser.parse(rss, handler);
+        parser.parse(rssUrl.openStream(), handler);
 
         System.out.println();
     }
