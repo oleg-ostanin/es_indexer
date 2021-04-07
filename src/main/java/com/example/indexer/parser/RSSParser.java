@@ -8,18 +8,15 @@ import org.xml.sax.helpers.DefaultHandler;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Locale;
 
-public class SAXExample {
+public class RSSParser {
     private static final String RSS_URL_STR = "https://news.ycombinator.com/rss";
 
     private Channel currentChannel;
@@ -28,7 +25,7 @@ public class SAXExample {
 
     private String currentText;
 
-    public void parse(String[] args) throws ParserConfigurationException, SAXException, IOException {
+    public Channel parse() throws ParserConfigurationException, SAXException, IOException {
         SAXParserFactory factory = SAXParserFactory.newInstance();
         SAXParser parser = factory.newSAXParser();
 
@@ -37,7 +34,7 @@ public class SAXExample {
         XMLHandler handler = new XMLHandler();
         parser.parse(rssUrl.openStream(), handler);
 
-        System.out.println();
+        return currentChannel;
     }
 
     private class XMLHandler extends DefaultHandler {
@@ -72,8 +69,6 @@ public class SAXExample {
                     break;
                 }
             }
-
-            System.out.println();
         }
 
         @Override
@@ -90,23 +85,21 @@ public class SAXExample {
                 case ITEM: {
                     currentElement = currentChannel;
                     currentChannel.getItems().add(currentItem);
-
+                    break;
                 }
                 case LINK: {
                     try {
                         currentElement.setLink(new URI(currentText));
-
-                        System.out.println();
                     } catch (URISyntaxException e) {
                         e.printStackTrace();
                     }
                     break;
                 }
                 case TITLE: {
-                    currentElement.setTitle(new Title(currentText));
+                    currentElement.setTitle(currentText);
                 }
                 case DESCRIPTION: {
-                    currentElement.setDescription(new Description(currentText));
+                    currentElement.setDescription(currentText);
                     break;
                 }
                 case PUBDATE: {
@@ -117,15 +110,11 @@ public class SAXExample {
                     currentItem.setComments(currentText);
                 }
             }
-
-            System.out.println();
         }
 
         @Override
         public void characters(char[] ch, int start, int length) throws SAXException {
             currentText = new String(ch).substring(start, start + length);
-
-            System.out.println();
         }
 
         @Override

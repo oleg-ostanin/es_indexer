@@ -6,7 +6,7 @@ import java.net.URI;
 
 @Data
 public class Element {
-    private Title title;
+    private String title;
     private URI link;
-    private Description description;
+    private String description;
 }
