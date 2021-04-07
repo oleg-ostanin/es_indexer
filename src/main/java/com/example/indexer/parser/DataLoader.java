@@ -23,6 +23,7 @@ import java.util.List;
 @Component
 public class DataLoader implements CommandLineRunner {
     private static final String NILS_TEST_INDEX = "nils_test_index";
+    private static final String TITLE = "title";
 
     @Override
     public void run(String... args) throws Exception {
@@ -41,8 +42,6 @@ public class DataLoader implements CommandLineRunner {
             IndexRequest request = createRequest(items.get(i), i);
 
             IndexResponse indexResponse = client.index(request, RequestOptions.DEFAULT);
-            //todo remove break
-            break;
         }
 
         client.close();
@@ -50,13 +49,13 @@ public class DataLoader implements CommandLineRunner {
 
     private IndexRequest createRequest(Item item, int id) throws IOException {
         XContentBuilder builder = XContentFactory.jsonBuilder();
+
         builder.startObject();
         {
-            builder.field("title", item.getTitle());
-//            builder.timeField("postDate", new Date());
-//            builder.field("message", "trying out Elasticsearch");
+            builder.field(TITLE, item.getTitle());
         }
         builder.endObject();
+
         IndexRequest indexRequest = new IndexRequest(NILS_TEST_INDEX)
                 .id(String.valueOf(id)).source(builder);
 
