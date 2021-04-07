@@ -2,7 +2,6 @@ package com.example.indexer.data;
 
 import lombok.Data;
 
-import java.util.Date;
 
 @Data
 public class Item extends Element {

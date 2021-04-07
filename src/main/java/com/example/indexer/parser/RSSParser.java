@@ -40,16 +40,6 @@ public class RSSParser {
 
     private class XMLHandler extends DefaultHandler {
         @Override
-        public void startDocument() throws SAXException {
-            // NO_OP
-        }
-
-        @Override
-        public void endDocument() throws SAXException {
-            // NO_OP
-        }
-
-        @Override
         public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
             IndexerTag tag = IndexerTag.valueOf(qName.toUpperCase());
 
@@ -105,11 +95,6 @@ public class RSSParser {
         @Override
         public void characters(char[] ch, int start, int length) throws SAXException {
             currentText = new String(ch).substring(start, start + length);
-        }
-
-        @Override
-        public void ignorableWhitespace(char[] ch, int start, int length) throws SAXException {
-            // NO_OP
         }
     }
 }
