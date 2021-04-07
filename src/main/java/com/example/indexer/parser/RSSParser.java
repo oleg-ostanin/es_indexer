@@ -1,6 +1,9 @@
 package com.example.indexer.parser;
 
-import com.example.indexer.data.*;
+import com.example.indexer.data.Channel;
+import com.example.indexer.data.Element;
+import com.example.indexer.data.IndexerTag;
+import com.example.indexer.data.Item;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -12,9 +15,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Locale;
+
 
 public class RSSParser {
     private static final String RSS_URL_STR = "https://news.ycombinator.com/rss";
@@ -38,16 +39,14 @@ public class RSSParser {
     }
 
     private class XMLHandler extends DefaultHandler {
-        private final DateFormat format = new SimpleDateFormat("E, dd MMM YYYY HH:MM:SS +ZZZZ", Locale.ENGLISH);
-
         @Override
         public void startDocument() throws SAXException {
-            // Тут будет логика реакции на начало документа
+            // NO_OP
         }
 
         @Override
         public void endDocument() throws SAXException {
-            // Тут будет логика реакции на конец документа
+            // NO_OP
         }
 
         @Override
@@ -55,9 +54,6 @@ public class RSSParser {
             IndexerTag tag = IndexerTag.valueOf(qName.toUpperCase());
 
             switch (tag) {
-                case RSS: {
-                    //NO_OP
-                }
                 case CHANNEL: {
                     currentChannel = new Channel();
                     currentElement = currentChannel;
@@ -76,12 +72,6 @@ public class RSSParser {
             IndexerTag tag = IndexerTag.valueOf(qName.toUpperCase());
 
             switch (tag) {
-                case RSS: {
-                    //NO_OP
-                }
-                case CHANNEL: {
-                    //NO_OP
-                }
                 case ITEM: {
                     currentElement = currentChannel;
                     currentChannel.getItems().add(currentItem);
@@ -119,7 +109,7 @@ public class RSSParser {
 
         @Override
         public void ignorableWhitespace(char[] ch, int start, int length) throws SAXException {
-            // Тут будет логика реакции на пустое пространство внутри элементов (пробелы, переносы строчек и так далее).
+            // NO_OP
         }
     }
 }
