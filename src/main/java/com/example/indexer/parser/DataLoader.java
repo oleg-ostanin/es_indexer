@@ -34,8 +34,6 @@ public class DataLoader implements CommandLineRunner {
         Channel channel = new RSSParser().parse();
 
         pushItems(channel.getItems());
-
-        System.exit(0);
     }
 
     private void pushItems(List<Item> items) throws IOException {
