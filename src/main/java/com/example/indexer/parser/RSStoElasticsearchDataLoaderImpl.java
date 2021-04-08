@@ -12,14 +12,16 @@ import org.elasticsearch.client.indices.AnalyzeRequest;
 import org.elasticsearch.client.indices.AnalyzeResponse;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * Reads data from RSS feed and loads it to elasticsearch.
+ */
 @Component
-public class DataLoader implements CommandLineRunner {
+public class RSStoElasticsearchDataLoaderImpl implements RSStoElasticsearchDataLoader {
     private static final String LOCALHOST = "localhost";
     private static final String HTTP = "http";
     private static final int PORT_9200 = 9200;
@@ -41,8 +43,10 @@ public class DataLoader implements CommandLineRunner {
                         new HttpHost(LOCALHOST, PORT_9201, HTTP)));
     }
 
-    @Override
-    public void run(String... args) throws Exception {
+    /**
+     * {@inheritDoc}
+     */
+    public void load() throws Exception {
         setUp();
 
         Channel channel = new RSSParser().parse();
@@ -80,7 +84,8 @@ public class DataLoader implements CommandLineRunner {
     }
 
     /**
-     * Converts each word in a title to more general form to perform better search
+     * Converts each word in a title to more general form to perform better search.
+     *
      * @param title Initial title.
      * @return Tags array.
      * @throws IOException if failed.
