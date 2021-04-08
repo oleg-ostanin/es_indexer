@@ -54,13 +54,10 @@ public class DataLoader implements CommandLineRunner {
 
     private void pushItems(List<Item> items) throws IOException {
         for (int i = 0; i < items.size(); i++) {
-
             IndexRequest request = createRequest(items.get(i), i);
 
             client.index(request, RequestOptions.DEFAULT);
         }
-
-        client.close();
     }
 
     private IndexRequest createRequest(Item item, int id) throws IOException {
