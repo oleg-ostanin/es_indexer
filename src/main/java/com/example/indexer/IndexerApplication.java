@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ConfigurableApplicationContext;
 
 @AllArgsConstructor
 @SpringBootApplication
@@ -17,13 +18,11 @@ public class IndexerApplication implements CommandLineRunner {
 
     public static void main(String[] args) {
         SpringApplication app = new SpringApplication(IndexerApplication.class);
-        app.run(args);
+        app.run(args).close();
     }
 
     @Override
     public void run(String... args) throws Exception {
         dataLoader.load(parser.parse(RSS_URL_STR));
-
-        System.exit(0);
     }
 }

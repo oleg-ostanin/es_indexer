@@ -13,6 +13,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -33,7 +34,12 @@ public class RSSParserImpl implements Parser {
         URL rssUrl = new URL(url);
 
         XMLHandler handler = new XMLHandler();
-        parser.parse(rssUrl.openStream(), handler);
+
+        InputStream stream = rssUrl.openStream();
+
+        parser.parse(stream, handler);
+
+        stream.close();
 
         return currentChannel.getItems();
     }
