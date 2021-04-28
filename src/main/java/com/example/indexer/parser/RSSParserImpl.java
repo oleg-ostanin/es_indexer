@@ -19,14 +19,18 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
 
+/**
+ * Rss parser implementation.
+ */
 @Service
-public class RSSParserImpl implements Parser {
+public class RSSParserImpl implements RSSParser {
     private Channel currentChannel;
     private Element currentElement;
     private Item currentItem;
 
     private String currentText;
 
+    /** {@inheritDoc} */
     public List<Item> parse(String url) throws ParserConfigurationException, SAXException, IOException {
         SAXParserFactory factory = SAXParserFactory.newInstance();
         SAXParser parser = factory.newSAXParser();

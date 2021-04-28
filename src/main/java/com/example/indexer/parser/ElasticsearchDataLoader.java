@@ -5,11 +5,11 @@ import com.example.indexer.data.Item;
 import java.util.List;
 
 /**
- * Reads data from RSS feed and loads it to elasticsearch.
+ * Loads items to elasticsearch.
  */
 public interface ElasticsearchDataLoader {
     /**
-     * Reads data from RSS feed and loads it to elasticsearch.
+     * Loads items to elasticsearch.
      *
      * @throws Exception if failed.
      */

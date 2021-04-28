@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Reads data from RSS feed and loads it to elasticsearch.
+ * Loads items to elasticsearch.
  */
 @Component
 public class ElasticsearchDataLoaderImpl implements ElasticsearchDataLoader {
