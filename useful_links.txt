@@ -1,0 +1,2 @@
+Create index with analyzer (8th min)
+https://www.udemy.com/course/elasticsearch-7-and-elastic-stack/learn/lecture/14728824#overview

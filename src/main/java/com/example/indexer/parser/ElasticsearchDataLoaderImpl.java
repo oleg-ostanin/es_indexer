@@ -1,7 +1,6 @@
 package com.example.indexer.parser;
 
 
-import com.example.indexer.data.Channel;
 import com.example.indexer.data.Item;
 import org.apache.http.HttpHost;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
@@ -27,7 +26,7 @@ import java.util.Map;
  * Reads data from RSS feed and loads it to elasticsearch.
  */
 @Component
-public class RSStoElasticsearchDataLoaderImpl implements RSStoElasticsearchDataLoader {
+public class ElasticsearchDataLoaderImpl implements ElasticsearchDataLoader {
     private static final String LOCALHOST = "localhost";
     private static final String HTTP = "http";
     private static final int PORT_9200 = 9200;
@@ -39,11 +38,12 @@ public class RSStoElasticsearchDataLoaderImpl implements RSStoElasticsearchDataL
     private static final String TEXT = "text";
     private static final String ANALYZER = "analyzer";
     private static final String ENGLISH = "english";
-    private static final String TITLE_TAGS = "title_tags";
     private static final String LINK = "link";
     private static final String PUB_DATE = "pubDate";
     private static final String COMMENTS = "comments";
     private static final String DESCRIPTION = "description";
+
+    private static final String[] TEXT_FIELDS = new String[]{LINK, PUB_DATE, COMMENTS, DESCRIPTION};
 
     private RestHighLevelClient client;
 
@@ -57,33 +57,28 @@ public class RSStoElasticsearchDataLoaderImpl implements RSStoElasticsearchDataL
     /**
      * {@inheritDoc}
      */
-    public void load() throws Exception {
+    public void load(List<Item> items) throws Exception {
         setUp();
 
-        Channel channel = new RSSParser().parse();
+        createIndex(NILS_TEST_INDEX);
 
-        createIndex();
-
-        pushItems(channel.getItems());
+        pushItems(items);
 
         tearDown();
     }
 
-    private void createIndex() throws IOException {
-        DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest(NILS_TEST_INDEX);
+    private void createIndex(String name) throws IOException {
+        DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest(name);
 
+        // Delete index if exists
         try {
-            AcknowledgedResponse deleteIndexResponse = client.indices().delete(deleteIndexRequest, RequestOptions.DEFAULT);
+            client.indices().delete(deleteIndexRequest, RequestOptions.DEFAULT);
         }
         catch (Exception e) {
             e.printStackTrace();
         }
 
         CreateIndexRequest request = new CreateIndexRequest(NILS_TEST_INDEX);
-
-        Map<String, String> titleMap = new HashMap<>();
-        titleMap.put(TYPE, TEXT);
-        titleMap.put(ANALYZER, ENGLISH);
 
         XContentBuilder builder = XContentFactory.jsonBuilder();
         builder.startObject();
@@ -96,37 +91,21 @@ public class RSStoElasticsearchDataLoaderImpl implements RSStoElasticsearchDataL
                     builder.field(ANALYZER, ENGLISH);
                 }
                 builder.endObject();
-                builder.startObject(LINK);
-                {
-                    builder.field(TYPE, TEXT);
+
+                for (String field : TEXT_FIELDS) {
+                    builder.startObject(field);
+                    {
+                        builder.field(TYPE, TEXT);
+                    }
+                    builder.endObject();
                 }
-                builder.endObject();
-                builder.startObject(PUB_DATE);
-                {
-                    builder.field(TYPE, TEXT);
-                }
-                builder.endObject();
-                builder.startObject(COMMENTS);
-                {
-                    builder.field(TYPE, TEXT);
-                }
-                builder.endObject();
-                builder.startObject(DESCRIPTION);
-                {
-                    builder.field(TYPE, TEXT);
-                }
-                builder.endObject();
             }
             builder.endObject();
         }
         builder.endObject();
         request.mapping(builder);
 
-
-
-        CreateIndexResponse createIndexResponse = client.indices().create(request, RequestOptions.DEFAULT);
-
-        System.out.println(createIndexResponse);
+        client.indices().create(request, RequestOptions.DEFAULT);
     }
 
     private void pushItems(List<Item> items) throws IOException {
@@ -143,7 +122,6 @@ public class RSStoElasticsearchDataLoaderImpl implements RSStoElasticsearchDataL
         builder.startObject();
 
         builder.field(TITLE, item.getTitle());
-        //builder.array(TITLE_TAGS, getTags(item.getTitle()));
         builder.field(LINK, item.getLink().toString());
         builder.field(PUB_DATE, item.getPubDate());
         builder.field(COMMENTS, item.getComments());
@@ -154,25 +132,6 @@ public class RSStoElasticsearchDataLoaderImpl implements RSStoElasticsearchDataL
         return new IndexRequest(NILS_TEST_INDEX)
                 .id(String.valueOf(id))
                 .source(builder);
-    }
-
-    /**
-     * Converts each word in a title to more general form to perform better search.
-     *
-     * @param title Initial title.
-     * @return Tags array.
-     * @throws IOException if failed.
-     */
-    private String[] getTags(String title) throws IOException {
-        AnalyzeRequest analyzeRequest = AnalyzeRequest.withGlobalAnalyzer("english", title);
-
-        AnalyzeResponse response = client.indices().analyze(analyzeRequest, RequestOptions.DEFAULT);
-
-        return response.getTokens().stream()
-                .map(AnalyzeResponse.AnalyzeToken::getTerm)
-                .filter(term -> term.length() > 1)
-                .distinct()
-                .toArray(String[]::new);
     }
 
     private void tearDown() throws IOException {

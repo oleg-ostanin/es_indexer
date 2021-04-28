@@ -4,6 +4,7 @@ import com.example.indexer.data.Channel;
 import com.example.indexer.data.Element;
 import com.example.indexer.data.IndexerTag;
 import com.example.indexer.data.Item;
+import org.springframework.stereotype.Service;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -15,27 +16,26 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.List;
 
-
-public class RSSParser {
-    private static final String RSS_URL_STR = "https://news.ycombinator.com/rss";
-
+@Service
+public class RSSParserImpl implements Parser {
     private Channel currentChannel;
     private Element currentElement;
     private Item currentItem;
 
     private String currentText;
 
-    public Channel parse() throws ParserConfigurationException, SAXException, IOException {
+    public List<Item> parse(String url) throws ParserConfigurationException, SAXException, IOException {
         SAXParserFactory factory = SAXParserFactory.newInstance();
         SAXParser parser = factory.newSAXParser();
 
-        URL rssUrl = new URL(RSS_URL_STR);
+        URL rssUrl = new URL(url);
 
         XMLHandler handler = new XMLHandler();
         parser.parse(rssUrl.openStream(), handler);
 
-        return currentChannel;
+        return currentChannel.getItems();
     }
 
     private class XMLHandler extends DefaultHandler {
