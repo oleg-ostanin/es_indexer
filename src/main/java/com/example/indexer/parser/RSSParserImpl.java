@@ -35,11 +35,9 @@ public class RSSParserImpl implements Parser {
 
         XMLHandler handler = new XMLHandler();
 
-        InputStream stream = rssUrl.openStream();
-
-        parser.parse(stream, handler);
-
-        stream.close();
+        try(InputStream stream = rssUrl.openStream()) {
+            parser.parse(stream, handler);
+        }
 
         return currentChannel.getItems();
     }
