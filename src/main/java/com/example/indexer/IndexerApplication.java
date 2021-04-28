@@ -1,7 +1,7 @@
 package com.example.indexer;
 
-import com.example.indexer.parser.RSSParser;
 import com.example.indexer.parser.ElasticsearchDataLoader;
+import com.example.indexer.parser.RSSParser;
 import lombok.AllArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
