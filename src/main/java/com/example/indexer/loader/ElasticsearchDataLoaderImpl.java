@@ -50,6 +50,7 @@ public class ElasticsearchDataLoaderImpl implements ElasticsearchDataLoader {
     private static final String PUB_DATE = "pubDate";
     private static final String COMMENTS = "comments";
     private static final String DESCRIPTION = "description";
+    private static final String SEARCH_AS_YOU_TYPE = "search_as_you_type";
 
     private static final String[] TEXT_FIELDS = new String[]{LINK, PUB_DATE, COMMENTS, DESCRIPTION};
 
@@ -87,7 +88,7 @@ public class ElasticsearchDataLoaderImpl implements ElasticsearchDataLoader {
             {
                 builder.startObject(TITLE);
                 {
-                    builder.field(TYPE, TEXT);
+                    builder.field(TYPE, SEARCH_AS_YOU_TYPE);
                     builder.field(ANALYZER, ENGLISH);
                 }
                 builder.endObject();
