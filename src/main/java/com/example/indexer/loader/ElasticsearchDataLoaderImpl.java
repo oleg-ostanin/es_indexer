@@ -1,26 +1,39 @@
 package com.example.indexer.loader;
 
 
+import com.carrotsearch.hppc.ObjectLookupContainer;
+import com.carrotsearch.hppc.cursors.ObjectCursor;
 import com.example.indexer.data.Item;
 import com.example.indexer.loader.ElasticsearchDataLoader;
+import lombok.extern.log4j.Log4j;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpHost;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
+import org.elasticsearch.action.admin.indices.settings.get.GetSettingsRequest;
+import org.elasticsearch.action.admin.indices.settings.get.GetSettingsResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.CreateIndexRequest;
+import org.elasticsearch.client.indices.GetIndexRequest;
+import org.elasticsearch.client.indices.GetMappingsRequest;
+import org.elasticsearch.client.indices.GetMappingsResponse;
+import org.elasticsearch.cluster.metadata.MappingMetadata;
+import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Loads items to elasticsearch.
  */
 @Component
+@Slf4j
 public class ElasticsearchDataLoaderImpl implements ElasticsearchDataLoader {
     private static final String LOCALHOST = "localhost";
     private static final String HTTP = "http";
@@ -62,18 +75,10 @@ public class ElasticsearchDataLoaderImpl implements ElasticsearchDataLoader {
         tearDown();
     }
 
-    private void createIndex(String name) throws IOException {
-        DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest(name);
+    private void createIndex(String index) throws IOException {
+        deleteIfExists(index);
 
-        // Delete index if exists
-        try {
-            client.indices().delete(deleteIndexRequest, RequestOptions.DEFAULT);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        CreateIndexRequest request = new CreateIndexRequest(NILS_TEST_INDEX);
+        CreateIndexRequest request = new CreateIndexRequest(index);
 
         XContentBuilder builder = XContentFactory.jsonBuilder();
         builder.startObject();
@@ -98,9 +103,14 @@ public class ElasticsearchDataLoaderImpl implements ElasticsearchDataLoader {
             builder.endObject();
         }
         builder.endObject();
+
         request.mapping(builder);
 
         client.indices().create(request, RequestOptions.DEFAULT);
+
+        mapping(index);
+
+        settings(index);
     }
 
     private void pushItems(List<Item> items) throws IOException {
@@ -127,6 +137,59 @@ public class ElasticsearchDataLoaderImpl implements ElasticsearchDataLoader {
         return new IndexRequest(NILS_TEST_INDEX)
                 .id(String.valueOf(id))
                 .source(builder);
+    }
+
+    private void deleteIfExists(String index) throws IOException {
+        GetIndexRequest request = new GetIndexRequest(index);
+
+        request.local(false);
+        request.humanReadable(true);
+        request.includeDefaults(false);
+        //request.indicesOptions(indicesOptions);
+
+        boolean exists = client.indices().exists(request, RequestOptions.DEFAULT);
+
+        if (exists) {
+            DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest(index);
+
+            // Delete index if exists
+            try {
+                client.indices().delete(deleteIndexRequest, RequestOptions.DEFAULT);
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void mapping(String index) throws IOException {
+        GetMappingsRequest request = new GetMappingsRequest();
+
+        request.indices(index);
+
+        GetMappingsResponse getMappingResponse = client.indices().getMapping(request, RequestOptions.DEFAULT);
+
+        Map<String, MappingMetadata> mapping = getMappingResponse.mappings();
+
+        for (String key : mapping.keySet()) {
+            MappingMetadata metadata = mapping.get(key);
+
+            log.info(key + " - " + metadata.source().string());
+        }
+    }
+
+    private void settings(String index) throws IOException {
+        GetSettingsRequest request = new GetSettingsRequest().indices(index);
+
+        request.includeDefaults(true);
+
+        GetSettingsResponse response = client.indices().getSettings(request, RequestOptions.DEFAULT);
+
+        Settings indexSettings = response.getIndexToSettings().get(index);
+
+        for (String key : indexSettings.keySet()) {
+            log.info(String.format("%s = %s", key, indexSettings.get(key)));
+        }
     }
 
     private void tearDown() throws IOException {
