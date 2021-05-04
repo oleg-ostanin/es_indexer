@@ -1,7 +1,8 @@
-package com.example.indexer.parser;
+package com.example.indexer.loader;
 
 
 import com.example.indexer.data.Item;
+import com.example.indexer.loader.ElasticsearchDataLoader;
 import org.apache.http.HttpHost;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.index.IndexRequest;

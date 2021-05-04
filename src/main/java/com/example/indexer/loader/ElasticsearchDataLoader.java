@@ -1,4 +1,4 @@
-package com.example.indexer.parser;
+package com.example.indexer.loader;
 
 import com.example.indexer.data.Item;
 
